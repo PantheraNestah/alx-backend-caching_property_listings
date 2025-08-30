@@ -34,4 +34,8 @@ def property_list(request):
     }
 
     #return render(request, 'properties/property_list.html', context)
-    return JsonResponse(data)
+    return JsonResponse({
+        "properties": list(properties.values(
+            "id", "title", "description", "price", "location", "created_at"
+        ))
+    })
