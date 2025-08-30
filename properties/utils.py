@@ -60,17 +60,17 @@ def get_redis_cache_metrics():
 
         hits = cache_db_info.get('keyspace_hits', 0)
         misses = cache_db_info.get('keyspace_misses', 0)
-        total_lookups = hits + misses
+        total_requests = hits + misses
 
         # 3. Calculate hit ratio, avoiding division by zero
-        if total_lookups > 0:
-            hit_ratio = (hits / total_lookups) * 100
+        if total_requests > 0:
+            hit_ratio = (hits / total_requests) * 100
         else:
             hit_ratio = 0.0
 
         # 4. Log the metrics for analysis
         logger.info("--- REDIS CACHE METRICS ---")
-        logger.info(f"  Total Lookups: {total_lookups}")
+        logger.info(f"  Total requests: {total_requests}")
         logger.info(f"  Cache Hits:    {hits}")
         logger.info(f"  Cache Misses:  {misses}")
         logger.info(f"  Hit Ratio:     {hit_ratio:.2f}%")
