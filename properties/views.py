@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.shortcuts import render
 from django.views.decorators.cache import cache_page
+from django.http import JsonResponse
 from .models import Property
 import logging
 
@@ -24,4 +25,13 @@ def property_list(request):
     context = {
         'properties': properties
     }
-    return render(request, 'properties/property_list.html', context)
+
+    # Serialize the QuerySet into a list of dictionaries
+    data = {
+        "properties": list(properties.values(
+            "id", "title", "description", "price", "location", "created_at"
+        ))
+    }
+
+    #return render(request, 'properties/property_list.html', context)
+    return JsonResponse(data)
