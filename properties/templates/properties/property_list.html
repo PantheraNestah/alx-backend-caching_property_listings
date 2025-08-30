@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Property Listings</title>
+    <style>
+        body { font-family: sans-serif; margin: 2em; }
+        .property { border: 1px solid #ccc; padding: 1em; margin-bottom: 1em; border-radius: 5px; }
+        h1 { color: #333; }
+        h2 { color: #555; }
+    </style>
+</head>
+<body>
+    <h1>Available Properties</h1>
+    <hr>
+    {% for prop in properties %}
+        <div class="property">
+            <h2>{{ prop.title }}</h2>
+            <p><strong>Location:</strong> {{ prop.location }}</p>
+            <p><strong>Price:</strong> ${{ prop.price }}</p>
+            <p>{{ prop.description|truncatewords:30 }}</p>
+        </div>
+    {% empty %}
+        <p>No properties are currently available.</p>
+    {% endfor %}
+</body>
+</html>
