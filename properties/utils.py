@@ -36,53 +36,27 @@ def get_all_properties():
 
 def get_redis_cache_metrics():
     """
-    Connects to Redis, retrieves keyspace statistics, calculates the
-    hit ratio, and logs the metrics.
-
-    Returns:
-        A dictionary containing cache metrics (hits, misses, hit_ratio).
+    Retrieve Redis cache hit/miss statistics and compute hit ratio.
     """
     try:
-        # 1. Get a raw Redis connection
-        # "default" is the alias of the cache in settings.py
         conn = get_redis_connection("default")
+        info = conn.info("stats")
 
-        # 2. Get keyspace statistics from Redis INFO command
-        info = conn.info('keyspace')
-        
-        # The key for our cache DB is 'db1' because we used /1 in settings.py
-        # If you used /0 or nothing, it would be 'db0'
-        cache_db_info = info.get('db1')
-
-        if not cache_db_info:
-            logger.warning("No cache metrics found for db1. The database might be empty or unused.")
-            return {"hits": 0, "misses": 0, "hit_ratio": 0.0}
-
-        hits = cache_db_info.get('keyspace_hits', 0)
-        misses = cache_db_info.get('keyspace_misses', 0)
+        hits = info.get("keyspace_hits", 0)
+        misses = info.get("keyspace_misses", 0)
         total_requests = hits + misses
 
-        # 3. Calculate hit ratio, avoiding division by zero
-        if total_requests > 0:
-            hit_ratio = (hits / total_requests) * 100
-        else:
-            hit_ratio = 0.0
-
-        # 4. Log the metrics for analysis
-        logger.info("--- REDIS CACHE METRICS ---")
-        logger.info(f"  Total requests: {total_requests}")
-        logger.info(f"  Cache Hits:    {hits}")
-        logger.info(f"  Cache Misses:  {misses}")
-        logger.info(f"  Hit Ratio:     {hit_ratio:.2f}%")
-        logger.info("---------------------------")
+        hit_ratio = hits / total_requests if total_requests > 0 else 0
 
         metrics = {
             "hits": hits,
             "misses": misses,
-            "hit_ratio": f"{hit_ratio:.2f}%"
+            "hit_ratio": round(hit_ratio, 2),
         }
+
+        logger.info("Redis Cache Metrics: %s", metrics)
         return metrics
 
     except Exception as e:
-        logger.error(f"Could not connect to Redis or get metrics: {e}")
-        return None
+        logger.error("Failed to fetch Redis metrics: %s", str(e))
+        return {"error": str(e)}
